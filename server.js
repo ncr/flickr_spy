@@ -2,6 +2,7 @@ var sys = require("sys"),
   http = require("http"),
   rest = require("./vendor/restler/lib/restler"),
   throttle = require("./vendor/throttle/lib/throttle"),
+
   host = "http://api.flickr.com",
   restPath = "/services/rest",
   feedsPath = "/services/feeds/photos_comments.gne",
@@ -10,11 +11,13 @@ var sys = require("sys"),
     format: "json",
     nojsoncallback: "1"
   },
+
   username = process.ARGV[2] || "ncr",
   connectionsCount = process.ARGV[3] || 10,
+
   userUrl = "http://flickr.com/photos/" + username;
 
-sys.puts("* Spying for: " + userUrl);
+sys.puts("* Flickr Spy: " + userUrl);
 
 rest.get(host + restPath, { query: process.mixin(defaultParams, { method: "flickr.urls.lookupUser", url: userUrl }), parser: rest.parsers.json }).addListener("success", function (data) {
   var user_id = data.user.id;
@@ -25,7 +28,7 @@ rest.get(host + restPath, { query: process.mixin(defaultParams, { method: "flick
         var user_id = c.nsid;
         rest.get(host + feedsPath, { query: process.mixin(defaultParams, { user_id: user_id }), parser: rest.parsers.json }).addListener("success", function (data) {
           var first = data.items[0];
-          if(first){ sys.puts(first.link.replace(/\/comment\d+\/$/, "")) };
+          if (first) { sys.puts(first.link.replace(/\/comment\d+\/$/, "")) };
           t.free();
         });
       });
