@@ -5,3 +5,6 @@ Not really a web app yet but a command line utility.
 1. Install node.js from http://nodejs.org
 2. Run with: node server.js your_flickr_nickname number_of_simultaneous_connections.
 3. Or just: node server.js
+4. Enjoy dozens of simultaneous connections without any blocking. Enjoy the event loop!
+
+Thanks to Ryan Dahl for node.js.
