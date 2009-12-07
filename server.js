@@ -3,7 +3,7 @@ var sys = require("sys"),
   throttle = require("./vendor/throttle/lib/throttle"),
 
   username = process.ARGV[2] || "ncr",
-  connectionsCount = process.ARGV[3] || 10,
+  connectionsCount = 3,
 
   userUrl = "http://flickr.com/photos/" + username;
 
@@ -14,8 +14,12 @@ flickr.rest.urls.lookupUser(userUrl, function (user_id) {
     var t = throttle.create(connectionsCount);
     user_ids.forEach(function (user_id) {
       t.run(function () {
-        flickr.feeds.photosComments(user_id, function (photo_ids) {
-          sys.puts(sys.inspect(photo_ids))
+        flickr.feeds.photosComments(user_id, function (photo_urls) {
+          photo_urls.forEach(function (photo_url) {
+            flickr.rest.photos.comments.getList(photo_url.match(/(\d+$)/)[1], function (user_ids) {
+              sys.debug(sys.inspect([photo_url, user_ids]))
+            });
+          });
           t.free();
         });
       });

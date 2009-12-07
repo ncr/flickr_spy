@@ -1,4 +1,5 @@
 var restler = require("../../restler/lib/restler"),
+  sys = require("sys"),
   host = "http://api.flickr.com",
   restPath = "/services/rest",
   defaultParams = {
@@ -40,6 +41,30 @@ exports.flickr = {
           callback(user_ids);
         });
       }
+    },
+    photos : {
+      comments: {
+        getList: function (photo_id, callback) {
+          sys.debug(photo_id)
+          restler.get(
+            host + restPath, 
+            { 
+              query: process.mixin(defaultParams, { method: "flickr.photos.comments.getList", photo_id: photo_id }),
+              parser: restler.parsers.json 
+            }
+          ).addListener("success", function (data) {
+            var user_ids = [];
+            data.comments.comment.forEach(function (c) {
+              var user_id = c.author;
+              if (user_ids.indexOf(user_id) == -1) {
+                user_ids.push(user_id);
+              }
+            });
+            callback(user_ids);
+          });
+        }
+      }
+      
     }
   }, 
   feeds: {

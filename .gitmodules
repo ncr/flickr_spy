@@ -1,3 +1,6 @@
 [submodule "vendor/restler"]
 	path = vendor/restler
 	url = git://github.com/danwrong/restler.git
+[submodule "vendor/underscore"]
+	path = vendor/underscore
+	url = git://github.com/documentcloud/underscore.git
