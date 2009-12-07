@@ -45,7 +45,6 @@ exports.flickr = {
     photos : {
       comments: {
         getList: function (photo_id, callback) {
-          sys.debug(photo_id)
           restler.get(
             host + restPath, 
             { 
