@@ -2,7 +2,7 @@ exports.create = function (count) {
   var deferred = [];
   var running = 0;
   return {
-    run: function(callback) {
+    run: function (callback) {
       if(running < count) {
         running++;
         callback();
@@ -10,7 +10,7 @@ exports.create = function (count) {
         deferred.push(callback)
       }
     },
-    free: function() {
+    free: function () {
       running--;
       if(deferred.length) {
         deferred.shift()()
