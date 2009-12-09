@@ -54,6 +54,7 @@ var spy = function (username) {
                   sys.debug(xxx++)
                   emitter.emit("data", [xxx, photo_url, _.intersect(contact_ids, user_ids)]);
                   if ((i1 == c1 - 1) && (i2 == c2 - 1)) {
+                    sys.debug("close")
                     emitter.emit("close");
                   }
                   t2.free();
