@@ -53,12 +53,14 @@ exports.flickr = {
             }
           ).addListener("success", function (data) {
             var user_ids = [];
-            data.comments.comment.forEach(function (c) {
-              var user_id = c.author;
-              if (user_ids.indexOf(user_id) == -1) {
-                user_ids.push(user_id);
-              }
-            });
+            if(data.comments) {
+              data.comments.comment.forEach(function (c) {
+                var user_id = c.author;
+                if (user_ids.indexOf(user_id) == -1) {
+                  user_ids.push(user_id);
+                }
+              });
+            }
             callback(user_ids);
           });
         }
