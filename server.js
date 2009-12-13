@@ -31,29 +31,29 @@ http.createServer(function (req, res) {
   }
 }).listen(8000);
 
-var xxx = 0;
 var spy = function (username) {
   var emitter = new process.EventEmitter();
   var url = "http://flickr.com/photos/" + username;
   flickr.rest.urls.lookupUser(url, function (user_id) {
     flickr.rest.contacts.getPublicList(user_id, function (user_ids) {
-      sys.debug(xxx++)
       var contact_ids = user_ids;
       var t1 = throttle.create(3);
       var c1 = user_ids.length;
-      user_ids.forEach(function (user_id, i1) {
+      var x1 = 0;
+      user_ids.forEach(function (user_id) {
         t1.run(function () {
           flickr.feeds.photosComments(user_id, function (photo_urls) {
-            sys.debug(xxx++)
+            x1++;
             var t2 = throttle.create(3);
             var c2 = photo_urls.length;
-            photo_urls.forEach(function (photo_url, i2) {
+            var x2 = 0;
+            photo_urls.forEach(function (photo_url) {
               t2.run(function () {
                 var photo_id = photo_url.match(/(\d+$)/)[1];
                 flickr.rest.photos.comments.getList(photo_id, function (user_ids) {
-                  sys.debug(xxx++)
-                  emitter.emit("data", [xxx, photo_url, _.intersect(contact_ids, user_ids)]);
-                  if ((i1 == c1 - 1) && (i2 == c2 - 1)) {
+                  x2++;
+                  emitter.emit("data", [photo_url, _.intersect(contact_ids, user_ids)]);
+                  if ((x1 == c1 - 1) && (x2 == c2 - 1)) {
                     sys.debug("close")
                     emitter.emit("close");
                   }
