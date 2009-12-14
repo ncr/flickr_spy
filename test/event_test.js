@@ -8,17 +8,15 @@ var think = function (callback) {
   setTimeout(callback, rand(100))
 }
 
-var x = 0
-var a = 0
-for (var i = 0; i < 3; i++) {
+var x = 0;
+var y = 0;
+for (var i = 0; i < rand(3) + 1; i++) {
   think(function () {
-    ++a;
-    var b = 0;
-    for (var j = 0; j < 3; j++) {
+    for (var j = 0; j < rand(3) + 1; j++) {
       think(function () {
-        ++b
-        sys.debug([++x, a, b])
+        sys.debug([++x, y])
       })
     }
+    y += j;
   })
 }

@@ -19,7 +19,9 @@ http.createServer(function (req, res) {
     res.sendHeader(200, {'Content-Type': 'text/plain'});
     spy("ncr").addListener("data", function(data){
       res.sendBody(JSON.stringify(data) + "\n");
+      sys.debug("data")
     }).addListener("close", function(){
+      sys.debug("close")
       res.finish();
     })
   } else {
@@ -32,40 +34,48 @@ http.createServer(function (req, res) {
 }).listen(8000);
 
 var spy = function (username) {
-  var emitter = new process.EventEmitter();
-  var url = "http://flickr.com/photos/" + username;
+  var emitter = new process.EventEmitter(),
+    url = "http://flickr.com/photos/" + username;
+  
   flickr.rest.urls.lookupUser(url, function (user_id) {
+    
     flickr.rest.contacts.getPublicList(user_id, function (user_ids) {
       var contact_ids = user_ids;
       var t1 = throttle.create(3);
-      var c1 = user_ids.length;
-      var x1 = 0;
+      var todo1 = user_ids.length, done1 = 0;
+      var todo2 = 0, done2 = 0;
+      
       user_ids.forEach(function (user_id) {
         t1.run(function () {
+          
           flickr.feeds.photosComments(user_id, function (photo_urls) {
-            x1++;
             var t2 = throttle.create(3);
-            var c2 = photo_urls.length;
-            var x2 = 0;
+            done1++;
+            todo2 += photo_urls.length;
+
             photo_urls.forEach(function (photo_url) {
               t2.run(function () {
                 var photo_id = photo_url.match(/(\d+$)/)[1];
+                
                 flickr.rest.photos.comments.getList(photo_id, function (user_ids) {
-                  x2++;
                   emitter.emit("data", [photo_url, _.intersect(contact_ids, user_ids)]);
-                  if ((x1 == c1 - 1) && (x2 == c2 - 1)) {
-                    sys.debug("close")
+                  done2++;
+                  if (todo1 == done1 && todo2 == done2) {
                     emitter.emit("close");
                   }
                   t2.free();
                 });
+                
               });
             });
+            
             t1.free();
           });
         });
       });
+      
     });
+    
   });
   return emitter;
 };
