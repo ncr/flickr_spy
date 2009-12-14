@@ -8,22 +8,16 @@ var think = function (callback) {
   setTimeout(callback, rand(100))
 }
 
-var y = 0, z = rand(10) + 10;
-
-for (var i = 0; i < z; i++) {
+var x = 0
+var a = 0
+for (var i = 0; i < 3; i++) {
   think(function () {
-    var xx = (++y == z) // xx obliczane w momencie wykonania
-
-    var b = 0, c = rand(10) + 10;
-    for (var j = 0; j < c; j++) {
+    ++a;
+    var b = 0;
+    for (var j = 0; j < 3; j++) {
       think(function () {
-        var yy = (++b == c) // yy obliczane w momencie wykonania
-
-        if (xx && yy) {
-          sys.debug("eof: " + y + " " + b)
-        } else {
-          sys.debug("...:" + y + " " + b)
-        }
+        ++b
+        sys.debug([++x, a, b])
       })
     }
   })
