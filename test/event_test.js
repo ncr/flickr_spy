@@ -1,22 +1,28 @@
 var sys = require("sys")
 
-var think = function (callback) {
-  setTimeout(callback, Math.floor(Math.random() * 100))
+var rand = function(max) {
+  return Math.floor(Math.random() * max)
 }
 
-var y = 0, z = Math.floor(Math.random() * 10) + 10;
+var think = function (callback) {
+  setTimeout(callback, rand(100))
+}
+
+var y = 0, z = rand(10) + 10;
 
 for (var i = 0; i < z; i++) {
   think(function () {
-    var xx = (++y == z)
+    var xx = (++y == z) // xx obliczane w momencie wykonania
 
-    var a = 0, b = 0, c = Math.floor(Math.random() * 10) + 10;
+    var b = 0, c = rand(10) + 10;
     for (var j = 0; j < c; j++) {
       think(function () {
-        var yy = (++b == c)
-        sys.debug([y, b])
+        var yy = (++b == c) // yy obliczane w momencie wykonania
+
         if (xx && yy) {
           sys.debug("eof: " + y + " " + b)
+        } else {
+          sys.debug("...:" + y + " " + b)
         }
       })
     }
