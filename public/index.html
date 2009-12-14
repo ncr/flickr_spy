@@ -1,10 +1,16 @@
-<doctype html>
+<!doctype html>
 <html>
   <head>
     <title>Flickr Spy</title>
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/flick/jquery-ui.css" type="text/css" media="all" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>
+    <script type="text/javascript">
+      $.getJSON("/activity", function (data) {
+        console.log(JSON.stringify(data))
+        $("body").append("<div>" + JSON.stringify(data) + "</div>")
+      })
+    </script>
   </head>
   <body>
     <h1>Flickr Spy</h1>
