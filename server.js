@@ -33,6 +33,8 @@ http.createServer(function (req, res) {
   }
 }).listen(8000);
 
+
+
 var spy = function (username) {
   var emitter = new process.EventEmitter(),
     url = "http://flickr.com/photos/" + username;
@@ -40,10 +42,10 @@ var spy = function (username) {
   flickr.rest.urls.lookupUser(url, function (user_id) {
     
     flickr.rest.contacts.getPublicList(user_id, function (user_ids) {
-      var contact_ids = user_ids;
-      var t1 = throttle.create(3);
-      var todo1 = user_ids.length, done1 = 0;
-      var todo2 = 0, done2 = 0;
+      var contact_ids = user_ids,
+        t1 = throttle.create(3),
+        todo1 = user_ids.length, done1 = 0,
+        todo2 = 0, done2 = 0;
       
       user_ids.forEach(function (user_id) {
         t1.run(function () {
