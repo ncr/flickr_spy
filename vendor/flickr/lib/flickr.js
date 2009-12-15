@@ -11,7 +11,8 @@ var restler = require("../../restler/lib/restler"),
 exports.flickr = {
   rest: {
     urls: {
-      lookupUser: function (url, callback) {
+      lookupUser: function (url) {
+        var promise = new process.Promise();
         restler.get(
           host + restPath, 
           { 
@@ -20,12 +21,16 @@ exports.flickr = {
           }
         ).addListener("success", function (data) {
           var user_id = data.user.id;
-          callback(user_id);
+          promise.emitSuccess(user_id);
+        }).addListener("error", function (data) {
+          promise.emitError(data);
         });
+        return promise;
       }
     },
     contacts: {
-      getPublicList: function (user_id, callback) {
+      getPublicList: function (user_id) {
+        var promise = new process.Promise();
         restler.get(
           host + restPath, 
           { 
@@ -38,13 +43,17 @@ exports.flickr = {
             var user_id = c.nsid;
             user_ids.push(user_id);
           });
-          callback(user_ids);
+          promise.emitSuccess(user_ids);
+        }).addListener("error", function (data) {
+          promise.emitError(data);
         });
+        return promise;
       }
     },
     photos : {
       comments: {
-        getList: function (photo_id, callback) {
+        getList: function (photo_id) {
+          var promise = new process.Promise();
           restler.get(
             host + restPath, 
             { 
@@ -61,15 +70,19 @@ exports.flickr = {
                 }
               });
             }
-            callback(user_ids);
+            promise.emitSuccess(user_ids);
+          }).addListener("error", function (data) {
+            promise.emitError(data);
           });
+          return promise;
         }
       }
       
     }
   }, 
   feeds: {
-    photosComments: function (user_id, callback) {
+    photosComments: function (user_id) {
+      var promise = new process.Promise();
       restler.get(
         host + "/services/feeds/photos_comments.gne", 
         { 
@@ -84,8 +97,11 @@ exports.flickr = {
             photo_urls.push(photo_url);
           }
         });
-        callback(photo_urls);
+        promise.emitSuccess(photo_urls);
+      }).addListener("error", function (data) {
+        promise.emitError(data);
       });
+      return promise;
     }
   }
 };
