@@ -51,6 +51,21 @@ exports.flickr = {
       }
     },
     photos : {
+      getInfo: function (photo_id) {
+        var promise = new process.Promise();
+        restler.get(
+          host + restPath,
+          {
+            query: process.mixin(defaultParams, { method: "flickr.photos.getInfo", photo_id: photo_id }),
+            parser: restler.parsers.json 
+          }
+        ).addListener("success", function (data) {
+          promise.emitSuccess(data.photo);
+        }).addListener("error", function (data) {
+          promise.emitError(data);
+        });
+        return promise;
+      },
       comments: {
         getList: function (photo_id) {
           var promise = new process.Promise();

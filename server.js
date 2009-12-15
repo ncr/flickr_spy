@@ -67,6 +67,12 @@ var spy_emitter = function (username) {
               t2.run(function () {
                 var photo_id = photo_url.match(/(\d+$)/)[1];
                 
+                flickr.photos.getInfo(photo_id).addCallback(function (photo) {
+                  
+                }).addErrback(function (data) {
+                  sys.debug("errback: geInfo: " + data);
+                });
+                
                 flickr.rest.photos.comments.getList(photo_id).addCallback(function (user_ids) {
                   sys.debug("callback: getList: data")
                   emitter.emit("data", [photo_url, _.intersect(contact_ids, user_ids)]);
