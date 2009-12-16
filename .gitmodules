@@ -4,3 +4,6 @@
 [submodule "vendor/underscore"]
 	path = vendor/underscore
 	url = git://github.com/documentcloud/underscore.git
+[submodule "gh-pages"]
+	path = gh-pages
+	url = git@github.com:ncr/flickr_spy.git
