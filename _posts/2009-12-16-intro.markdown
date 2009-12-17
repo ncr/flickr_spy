@@ -1,3 +1,5 @@
+<a href="http://www.flickr.com/photos/ncr/4190778599/" title="Paul Kalkbrenner by Jacek Becela, on Flickr"><img src="http://farm3.static.flickr.com/2583/4190778599_1264b9ef33_m.jpg" width="240" height="161" alt="Paul Kalkbrenner" /></a>
+
 I am a big fan of [Ryan Dahl's](http://four.livejournal.com/) 
 [node.js](http://nodejs.org). The amount of excitement it gives me reminds
 me of Rails excitement back in the days. I started playing with node.js and
