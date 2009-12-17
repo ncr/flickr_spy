@@ -1,14 +1,12 @@
 ---
 layout: default
-title: Flickr Spy - Discover where your flickr friends are commenting
-subtitle: Learning node.js while doing something useful
 ---
 
 
 {% for post in site.posts %}
-  <h2>{{ post.title }}</a></h2>
+  <h2>{{ post.title }}</h2>
   <div>
   {{ post.content }}
   </div>
-  <em>Posted on {{ post.date | date_to_long_string }}.</em>
+  <em>Posted on {{ post.date | date_to_long_string }}</em>
 {% endfor %}
