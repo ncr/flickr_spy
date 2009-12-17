@@ -13,6 +13,10 @@ This information is scattered among individual
 that are published automatically by all flickr users. So the only thing I have
 to do is combine them and present them in a simple, usable interface.
 
+A 
+[similar solution](http://pipes.yahoo.com/pipes/pipe.info?_id=1vmbb0k33bgh1mxjeppzna) 
+already exists but is fairly limited. I shamelessly stole the name, I admit.
+
 On technical side, this requires many requests to flickr api and node.js is 
 a perfect tool for the job.
 
