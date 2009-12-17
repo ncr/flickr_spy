@@ -17,8 +17,8 @@ A
 [similar solution](http://pipes.yahoo.com/pipes/pipe.info?_id=1vmbb0k33bgh1mxjeppzna) 
 already exists but is fairly limited. I shamelessly stole the name, I admit.
 
-On technical side, this requires many requests to flickr api and node.js is 
-a perfect tool for the job.
+Anyway, on technical side, Flickr Spy requires many requests to flickr api 
+and node.js is just a perfect tool for this job.
 
 If everything goes ok, I'd like to post very short notes here, all related to
 development of [Flickr Spy](http://github.com/ncr/flickr_spy) and node.js 
