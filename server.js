@@ -15,14 +15,20 @@ http.createServer(function (req, res) {
       res.sendBody(data);
       res.finish();
     });
-  } else if (req.uri.path.match(/^\/activity/)) {
-    sys.debug("client connected")
+  } else if (req.uri.path.match(/^\/promise/)) {
     res.sendHeader(200, {'Content-Type': 'text/plain'});
     spy_promise("ncr").addCallback(function (data) {
       res.sendBody(JSON.stringify(data) + "\n");
       res.finish();
     }).addErrback(function (data) {
       res.sendBody(JSON.stringify(data) + "\n");
+      res.finish();
+    });
+  } else if (req.uri.path.match(/^\/emitter/)) {
+    res.sendHeader(200, {'Content-Type': 'text/plain'});
+    spy_emitter("ncr").addListener("data", function (data) {
+      res.sendBody(JSON.stringify(data) + "\n");
+    }).addListener("close", function () {
       res.finish();
     });
   } else {
@@ -67,17 +73,20 @@ var spy_emitter = function (username) {
               t2.run(function () {
                 var photo_id = photo_url.match(/(\d+$)/)[1];
                 
+                /*
                 flickr.photos.getInfo(photo_id).addCallback(function (photo) {
                   
                 }).addErrback(function (data) {
                   sys.debug("errback: geInfo: " + data);
                 });
+                */
                 
                 flickr.rest.photos.comments.getList(photo_id).addCallback(function (user_ids) {
                   sys.debug("callback: getList: data")
                   emitter.emit("data", [photo_url, _.intersect(contact_ids, user_ids)]);
                   finalize();
                 }).addErrback(function (data) {
+                  // do not emit error from this loop
                   sys.debug("errback: getList: " + data);
                   finalize();
                 });
@@ -87,16 +96,19 @@ var spy_emitter = function (username) {
             
             t1.free();
           }).addErrback(function (data) {
+            emitter.emit("error");
             sys.debug("errback: photosComments: " + data);
           });
         });
       });
       
     }).addErrback(function (data) {
+      emitter.emit("error");
       sys.debug("errback: getPublicList: " + data);
     });
     
   }).addErrback(function (data) {
+    emitter.emit("error");
     sys.debug("errback: lookupUser: " + data);
   });
   return emitter;
