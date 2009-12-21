@@ -40,16 +40,19 @@ http.createServer(function (req, res) {
 
       if(path.match(/\.js$/)) {
         headers['Content-Type'] = 'application/javascript';
+        headers['Content-Length'] = data.length;
+        res.sendHeader(200, headers);
+        res.sendBody(data);
+        res.finish();
       } else if(path.match(/\.swf$/)) {
         headers['Content-Type'] = 'application/x-shockwave-flash';
+        headers['Content-Length'] = data.length;
+        res.sendHeader(200, headers);
+        res.sendBody(data, "binary");
+        res.finish();
       } else {
         lol(); // flunk
       }
-      sys.puts(data.length)
-      headers['Content-Length'] = data.length;
-      res.sendHeader(200, headers);
-      res.sendBody(data);
-      res.finish();
     }).addErrback(function () {
       posix.cat("public/404.html").addCallback(function (data) {
         res.sendHeader(404, {'Content-Type': 'text/html'});

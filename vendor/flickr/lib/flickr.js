@@ -7,7 +7,7 @@ var restler = require("../../restler/lib/restler"),
     format: "json",
     nojsoncallback: "1"
   };
-    
+  
 exports.flickr = {
   rest: {
     urls: {
