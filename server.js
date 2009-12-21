@@ -9,13 +9,16 @@ var sys = require("sys"),
 sys.puts("* Flickr Spy: " + username);
 
 http.createServer(function (req, res) {
-  if (req.uri.path == "/") {
+  var path = req.uri.path
+  sys.puts(path)
+  //sys.puts(sys.inspect(req.headers))
+  if (path == "/") {
     posix.cat("public/index.html").addCallback(function (data) {
       res.sendHeader(200, {'Content-Type': 'text/html'});
       res.sendBody(data);
       res.finish();
     });
-  } else if (req.uri.path.match(/^\/promise/)) {
+  } else if (path.match(/^\/promise/)) {
     res.sendHeader(200, {'Content-Type': 'text/plain'});
     spy_promise("ncr").addCallback(function (data) {
       res.sendBody(JSON.stringify(data) + "\n");
@@ -24,7 +27,7 @@ http.createServer(function (req, res) {
       res.sendBody(JSON.stringify(data) + "\n");
       res.finish();
     });
-  } else if (req.uri.path.match(/^\/emitter/)) {
+  } else if (path.match(/^\/emitter/)) {
     res.sendHeader(200, {'Content-Type': 'text/plain'});
     spy_emitter("ncr").addListener("data", function (data) {
       res.sendBody(JSON.stringify(data) + "\n");
@@ -32,13 +35,30 @@ http.createServer(function (req, res) {
       res.finish();
     });
   } else {
-    posix.cat("public/404.html").addCallback(function (data) {
-      res.sendHeader(200, {'Content-Type': 'text/html'});
+    posix.cat("public" + path, "binary").addCallback(function (data) {
+      var headers = {};
+
+      if(path.match(/\.js$/)) {
+        headers['Content-Type'] = 'application/javascript';
+      } else if(path.match(/\.swf$/)) {
+        headers['Content-Type'] = 'application/x-shockwave-flash';
+      } else {
+        lol(); // flunk
+      }
+      sys.puts(data.length)
+      headers['Content-Length'] = data.length;
+      res.sendHeader(200, headers);
       res.sendBody(data);
       res.finish();
+    }).addErrback(function () {
+      posix.cat("public/404.html").addCallback(function (data) {
+        res.sendHeader(404, {'Content-Type': 'text/html'});
+        res.sendBody(data);
+        res.finish();
+      });
     });
   }
-}).listen(8000);
+}).listen(3000);
 
 var spy_emitter = function (username) {
   var emitter = new process.EventEmitter(),
