@@ -4,14 +4,15 @@ var sys = require("sys"),
   flickr = require("./vendor/flickr/lib/flickr").flickr,
   underscore = require("./vendor/underscore/underscore"),
   throttle = require("./vendor/throttle/lib/throttle"),
+  static = require("./vendor/static/lib/static").static,
   username = process.ARGV[2] || "ncr";
 
 sys.puts("* Flickr Spy: " + username);
 
 http.createServer(function (req, res) {
-  var path = req.uri.path
-  sys.puts(path)
-  //sys.puts(sys.inspect(req.headers))
+  var path = req.uri.path;
+  sys.debug(path);
+  
   if (path == "/") {
     posix.cat("public/index.html").addCallback(function (data) {
       res.sendHeader(200, {'Content-Type': 'text/html'});
@@ -34,32 +35,20 @@ http.createServer(function (req, res) {
     }).addListener("close", function () {
       res.finish();
     });
+  } else if (path == "/ws") {
+    req.connection.setTimeout(0);
+    res.use_chunked_encoding_by_default = false;
+    res.sendHeader(101, { 
+      "Upgrade": "WebSocket", 
+      "Connection": "Upgrade", 
+      "WebSocket-Origin": "http://localhost:3000", 
+      "WebSocket-Location": "http://localhost:3000/ws"
+    })
+    res.sendBody("\u0000" + "lol!!!" + "\uffff", "binary")
+    res.sendBody("\u0000" + "lol 666!!!" + "\uffff", "binary")
+    // res.finish();
   } else {
-    posix.cat("public" + path, "binary").addCallback(function (data) {
-      var headers = {};
-
-      if(path.match(/\.js$/)) {
-        headers['Content-Type'] = 'application/javascript';
-        headers['Content-Length'] = data.length;
-        res.sendHeader(200, headers);
-        res.sendBody(data);
-        res.finish();
-      } else if(path.match(/\.swf$/)) {
-        headers['Content-Type'] = 'application/x-shockwave-flash';
-        headers['Content-Length'] = data.length;
-        res.sendHeader(200, headers);
-        res.sendBody(data, "binary");
-        res.finish();
-      } else {
-        lol(); // flunk
-      }
-    }).addErrback(function () {
-      posix.cat("public/404.html").addCallback(function (data) {
-        res.sendHeader(404, {'Content-Type': 'text/html'});
-        res.sendBody(data);
-        res.finish();
-      });
-    });
+    static("public", req, res);
   }
 }).listen(3000);
 
