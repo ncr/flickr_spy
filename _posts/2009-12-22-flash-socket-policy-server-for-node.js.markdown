@@ -18,4 +18,4 @@ is shown [here](http://blog.new-bamboo.co.uk/2009/12/7/real-time-online-activity
 So here's a quick gist. A very minimal Flash Socket Policy server for
 ad-hoc use.
 
-<script src="http://gist.github.com/261697.js"></script>
+<script src="http://gist.github.com/261697.js"> </script>
