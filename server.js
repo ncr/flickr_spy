@@ -5,6 +5,7 @@ var sys = require("sys"),
   underscore = require("./vendor/underscore/underscore"),
   throttle = require("./vendor/throttle/lib/throttle"),
   static = require("./vendor/static/lib/static").static,
+  ws = require("./vendor/ws/lib/ws").ws,
   username = process.ARGV[2] || "ncr";
 
 sys.puts("* Flickr Spy: " + username);
@@ -36,17 +37,14 @@ http.createServer(function (req, res) {
       res.finish();
     });
   } else if (path == "/ws") {
-    req.connection.setTimeout(0);
-    res.use_chunked_encoding_by_default = false;
-    res.sendHeader(101, { 
-      "Upgrade": "WebSocket", 
-      "Connection": "Upgrade", 
-      "WebSocket-Origin": "http://localhost:3000", 
-      "WebSocket-Location": "http://localhost:3000/ws"
+    ws.use(req, res, function(ws) {
+      ws.addListener("connect", function(){ sys.debug("connect")})
+      ws.addListener("receive", function(data){ sys.debug(data)})
+      ws.addListener("close", function() {sys.debug("close")})
+      ws.send("lol!")
+      ws.send("lol!")
+      ws.close();
     })
-    res.sendBody("\u0000" + "lol!!!" + "\uffff", "binary")
-    res.sendBody("\u0000" + "lol 666!!!" + "\uffff", "binary")
-    // res.finish();
   } else {
     static("public", req, res);
   }

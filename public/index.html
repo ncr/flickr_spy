@@ -17,9 +17,16 @@
        
     <script type="text/javascript">
       var myWebSocket = new WebSocket("ws://localhost:3000/ws");
-      myWebSocket.onopen = function(evt) { alert("Connection open ..."); };
-      myWebSocket.onmessage = function(evt) { alert( "Received Message:  "  +  evt.data); };
-      myWebSocket.onclose = function(evt) { alert("Connection closed."); };
+      myWebSocket.onopen = function(evt) { 
+        myWebSocket.send("yo!!!\r\nyo!!!\r\n")
+      //  alert("Connection open ..."); 
+      };
+      myWebSocket.onmessage = function(evt) { 
+      //  alert( "Received Message:  "  +  evt.data);
+      };
+      myWebSocket.onclose = function(evt) {// alert("Connection closed.");
+      };
+      
     </script>
   </head>
   <body>
