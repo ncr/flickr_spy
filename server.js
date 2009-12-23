@@ -42,16 +42,17 @@ http.createServer(function (req, res) {
 }).listen(3000);
 
 ws.createServer(function (websocket) {
-  websocket.addListener("connect", function (resource) {
+  websocket.addListener("connect", function (resource) { // emitted after handshake
     sys.debug("connect: " + resource);
-    websocket.send("wow!!!");
-    setTimeout(websocket.close, 5000);
-  }).addListener("receive", function (data) {
-    sys.debug("data: " + data);
-  }).addListener("close", function () {
-    sys.debug("close");
-  })
+    setTimeout(websocket.close, 10 * 1000); // server closes connection after 10s
+  }).addListener("receive", function (data) { // handle incoming data
+    sys.debug(data)
+    websocket.send("Thanks!") // send data to client
+  }).addListener("close", function () { // emitted when server or client closes connection
+    sys.debug("close")
+  });
 }).listen(8080);
+
 
 var spy_emitter = function (username) {
   var emitter = new process.EventEmitter(),
