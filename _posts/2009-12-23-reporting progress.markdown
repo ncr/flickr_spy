@@ -10,4 +10,8 @@ Right: browser, Firebug console.
 
 _I need to work on soundtrack ;)_
 
-Anyway, I want to experiment with something. As you have noticed there's no RSS here and no comment system. I like [Disqus](http://disqus.com/) but lets do the experiment. Please comment <a href="http://flickr.com/gp/ncr/w13u8w">here</a> - this is a private link (a guest pass) to flickr comments under the above vid. Enjoy.
+
+P.S.
+
+As you have noticed there's no RSS here and no comment system. For now please comment <a href="http://flickr.com/gp/ncr/w13u8w">here</a> - these are flickr comments under the above vid so you need 
+to have a flickr account ([free signup](http://flickr.com/signup)).
