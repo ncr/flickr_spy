@@ -13,46 +13,23 @@ sys.puts("* Flickr Spy: " + username);
 http.createServer(function (req, res) {
   var path = req.uri.path;
   sys.debug(path);
-  
-  if (path == "/") {
-    posix.cat("public/index.html").addCallback(function (data) {
-      res.sendHeader(200, {'Content-Type': 'text/html'});
-      res.sendBody(data);
-      res.finish();
-    });
-  } else if (path.match(/^\/promise/)) {
-    res.sendHeader(200, {'Content-Type': 'text/plain'});
-    spy_promise("ncr").addCallback(function (data) {
-      res.sendBody(JSON.stringify(data) + "\n");
-      res.finish();
-    }).addErrback(function (data) {
-      res.sendBody(JSON.stringify(data) + "\n");
-      res.finish();
-    });
-  } else if (path.match(/^\/emitter/)) {
-    res.sendHeader(200, {'Content-Type': 'text/plain'});
-    spy_emitter("ncr").addListener("data", function (data) {
-      res.sendBody(JSON.stringify(data) + "\n");
-    }).addListener("close", function () {
-      res.finish();
-    });
-  } else {
-    static("public", req, res);
-  }
+  static("public", req, res);
 }).listen(3000);
 
 ws.createServer(function (websocket) {
-  websocket.addListener("connect", function (resource) { // emitted after handshake
-    sys.debug("connect: " + resource);
-    setTimeout(websocket.close, 10 * 1000); // server closes connection after 10s
-  }).addListener("receive", function (data) { // handle incoming data
-    sys.debug(data)
-    websocket.send("Thanks!") // send data to client
-  }).addListener("close", function () { // emitted when server or client closes connection
+  websocket.addListener("connect", function (resource) {
+    sys.debug("connect: " + resource.slice(1));
+    spy_emitter(resource.slice(1)).addListener("data", function (data) {
+      websocket.send(data);
+    }).addListener("close", function () {
+      websocket.close();
+    })
+  }).addListener("receive", function (data) {
+    sys.debug("receive: " + data);
+  }).addListener("close", function () {
     sys.debug("close")
   });
 }).listen(8080);
-
 
 var spy_emitter = function (username) {
   var emitter = new process.EventEmitter(),
@@ -74,7 +51,7 @@ var spy_emitter = function (username) {
             done1++;
             todo2 += photo_urls.length;
             
-            var finalize = function() {
+            function finalize() {
               done2++;
               if (todo1 == done1 && todo2 == done2) {
                 sys.debug("callback: getList: close")

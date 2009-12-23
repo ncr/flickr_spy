@@ -12,8 +12,9 @@ exports.static = function (base, request, response) {
     if (path.lastIndexOf(".") < 0) return
     return path.slice(path.lastIndexOf(".") + 1)
   }
-
-  var file = path.normalize(base + request.uri.path);
+  
+  var uriPath = (request.uri.path == "/") ? "/index.html" : request.uri.path,
+    file = path.normalize(base + uriPath);
   
   var four_oh_four = function () {
     posix.cat("public/404.html").addCallback(function (data) {

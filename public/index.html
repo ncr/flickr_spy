@@ -10,23 +10,21 @@
     <script type="text/javascript" src="/ws/swfobject.js"></script>
     <script type="text/javascript" src="/ws/FABridge.js"></script>
     <script type="text/javascript" src="/ws/web_socket.js"></script>
-    <script type="text/javascript" src="/test.js"></script>
     <script type="text/javascript">
       WebSocket.__swfLocation = "/ws/WebSocketMain.swf";
     </script>
        
     <script type="text/javascript">
-      var myWebSocket = new WebSocket("ws://localhost:8080/ws");
-      myWebSocket.onopen = function(evt) { 
-        myWebSocket.send("yo!!!\r\nyo!!!\r\n")
-      //  alert("Connection open ..."); 
+      var ws = new WebSocket("ws://localhost:8080/ncr");
+      ws.onopen = function(e) { 
+        console.log("open")
       };
-      myWebSocket.onmessage = function(evt) { 
-      //  alert( "Received Message:  "  +  evt.data);
+      ws.onmessage = function(e) {
+        console.log(e.data)
       };
-      myWebSocket.onclose = function(evt) {// alert("Connection closed.");
+      ws.onclose = function(e) {
+        console.log("close")
       };
-      
     </script>
   </head>
   <body>
