@@ -5,7 +5,7 @@ var sys = require("sys"),
   underscore = require("./vendor/underscore/underscore"),
   throttle = require("./vendor/throttle/lib/throttle"),
   static = require("./vendor/static/lib/static").static,
-  ws = require("./vendor/ws/lib/ws").ws,
+  ws = require("./vendor/ws/lib/ws"),
   username = process.ARGV[2] || "ncr";
 
 sys.puts("* Flickr Spy: " + username);
@@ -36,19 +36,22 @@ http.createServer(function (req, res) {
     }).addListener("close", function () {
       res.finish();
     });
-  } else if (path == "/ws") {
-    ws.use(req, res, function(ws) {
-      ws.addListener("connect", function(){ sys.debug("connect")})
-      ws.addListener("receive", function(data){ sys.debug(data)})
-      ws.addListener("close", function() {sys.debug("close")})
-      ws.send("lol!")
-      ws.send("lol!")
-      ws.close();
-    })
   } else {
     static("public", req, res);
   }
 }).listen(3000);
+
+ws.createServer(function (websocket) {
+  websocket.addListener("connect", function (resource) {
+    sys.debug("connect: " + resource);
+    websocket.send("wow!!!");
+    setTimeout(websocket.close, 5000);
+  }).addListener("receive", function (data) {
+    sys.debug("data: " + data);
+  }).addListener("close", function () {
+    sys.debug("close");
+  })
+}).listen(8080);
 
 var spy_emitter = function (username) {
   var emitter = new process.EventEmitter(),

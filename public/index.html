@@ -16,7 +16,7 @@
     </script>
        
     <script type="text/javascript">
-      var myWebSocket = new WebSocket("ws://localhost:3000/ws");
+      var myWebSocket = new WebSocket("ws://localhost:8080/ws");
       myWebSocket.onopen = function(evt) { 
         myWebSocket.send("yo!!!\r\nyo!!!\r\n")
       //  alert("Connection open ..."); 
