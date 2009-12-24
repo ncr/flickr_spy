@@ -6,7 +6,7 @@
 	url = git://github.com/documentcloud/underscore.git
 [submodule "gh-pages"]
 	path = gh-pages
-	url = git@github.com:ncr/flickr_spy.git
+	url = git://github.com/ncr/flickr_spy.git
 [submodule "vendor/ws"]
 	path = vendor/ws
 	url = git://github.com/ncr/node.ws.js.git
