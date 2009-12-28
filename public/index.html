@@ -2,11 +2,10 @@
 <html>
   <head>
     <title>Flickr Spy</title>
-<!--
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/flick/jquery-ui.css" type="text/css" media="all" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>
--->
+    <script type="text/javascript" src="/application.js"></script>
     <script type="text/javascript" src="/ws/swfobject.js"></script>
     <script type="text/javascript" src="/ws/FABridge.js"></script>
     <script type="text/javascript" src="/ws/web_socket.js"></script>
@@ -15,12 +14,16 @@
     </script>
        
     <script type="text/javascript">
+      function append(data) {
+        $("body").append($.nano("<div><a href='{page}'><img src='{image}' /></a></div>", data))
+      }
+    
       var ws = new WebSocket("ws://localhost:8080/ncr");
       ws.onopen = function(e) { 
         console.log("open")
       };
       ws.onmessage = function(e) {
-        console.log(e.data)
+        append(JSON.parse(e.data))
       };
       ws.onclose = function(e) {
         console.log("close")

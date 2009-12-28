@@ -105,14 +105,17 @@ exports.flickr = {
           parser: restler.parsers.json 
         }
       ).addListener("success", function (data) {
-        var photo_urls = [];
+        var photo_ids = [];
         data.items.forEach(function (p) {
-          var photo_url = p.link.replace(/\/comment\d+\/$/, "");
-          if (photo_urls.indexOf(photo_url) == -1) {
-            photo_urls.push(photo_url);
+          var m = p.link.match(/(\d+)\/comment\d+\/$/); // won't match sets
+          if (m) { 
+            var photo_id = m[1];
+            if (photo_ids.indexOf(photo_id) == -1) {
+              photo_ids.push(photo_id);
+            }
           }
         });
-        promise.emitSuccess(photo_urls);
+        promise.emitSuccess(photo_ids);
       }).addListener("error", function (data) {
         promise.emitError(data);
       });

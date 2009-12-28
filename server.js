@@ -7,6 +7,16 @@ var sys = require("sys"),
   static = require("./vendor/static/lib/static").static,
   ws = require("./vendor/ws/lib/ws"),
   username = process.ARGV[2] || "ncr";
+  
+function nano(template, data) {
+  return template.replace(/\{([\w\.]*)}/g, function (str, key) {
+    var keys = key.split("."), value = data[keys.shift()];
+    keys.forEach(function (key) { value = value[key] });
+    return value;
+  });
+}
+
+
 
 sys.puts("* Flickr Spy: " + username);
 
@@ -20,7 +30,7 @@ ws.createServer(function (websocket) {
   websocket.addListener("connect", function (resource) {
     sys.debug("connect: " + resource.slice(1));
     spy_emitter(resource.slice(1)).addListener("data", function (data) {
-      websocket.send(data);
+      websocket.send(JSON.stringify(data));
     }).addListener("close", function () {
       websocket.close();
     })
@@ -36,6 +46,7 @@ var spy_emitter = function (username) {
     url = "http://flickr.com/photos/" + username;
   
   flickr.rest.urls.lookupUser(url).addCallback(function (user_id) {
+    var my_user_id = user_id;
     
     flickr.rest.contacts.getPublicList(user_id).addCallback(function (user_ids) {
       var contact_ids = user_ids,
@@ -46,10 +57,10 @@ var spy_emitter = function (username) {
       user_ids.forEach(function (user_id) {
         t1.run(function () {
           
-          flickr.feeds.photosComments(user_id).addCallback(function (photo_urls) {
+          flickr.feeds.photosComments(user_id).addCallback(function (photo_ids) {
             var t2 = throttle.create(3);
             done1++;
-            todo2 += photo_urls.length;
+            todo2 += photo_ids.length;
             
             function finalize() {
               done2++;
@@ -60,26 +71,36 @@ var spy_emitter = function (username) {
               t2.free();
             };
 
-            photo_urls.forEach(function (photo_url) {
+            photo_ids.forEach(function (photo_id) {
               t2.run(function () {
-                var photo_id = photo_url.match(/(\d+$)/)[1];
                 
-                /*
-                flickr.photos.getInfo(photo_id).addCallback(function (photo) {
+                flickr.rest.photos.getInfo(photo_id).addCallback(function (photo) {
+                  if(!photo.owner){sys.debug(sys.inspect(photo))} // fails sometimes
                   
+                  // skip my photos and photos of my contacts
+                  if (photo.owner.nsid != my_user_id && !_.include(contact_ids, photo.owner.nsid)) {
+                  
+                    flickr.rest.photos.comments.getList(photo_id).addCallback(function (user_ids) {
+                      if(!_.include(user_ids, my_user_id)) { // skip if I already commented
+
+                        var photo_url  = nano("http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg", photo);
+                        var photo_page = nano("http://www.flickr.com/photos/{owner.nsid}/{id}", photo);
+                        
+                        sys.debug("callback: getList: data")
+                        emitter.emit("data", {page: photo_page, image: photo_url, contact_ids: _.intersect(contact_ids, user_ids)});
+                      }
+                      finalize();
+                    }).addErrback(function (data) {
+                      // do not emit error from this loop
+                      sys.debug("errback: getList: " + data);
+                      finalize();
+                    });
+                  } else {
+                    finalize();
+                  }
                 }).addErrback(function (data) {
+                  finalize();
                   sys.debug("errback: geInfo: " + data);
-                });
-                */
-                
-                flickr.rest.photos.comments.getList(photo_id).addCallback(function (user_ids) {
-                  sys.debug("callback: getList: data")
-                  emitter.emit("data", [photo_url, _.intersect(contact_ids, user_ids)]);
-                  finalize();
-                }).addErrback(function (data) {
-                  // do not emit error from this loop
-                  sys.debug("errback: getList: " + data);
-                  finalize();
                 });
                 
               });
