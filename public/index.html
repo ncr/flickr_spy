@@ -17,7 +17,7 @@
       function append(data) {
         $("body").append($.nano("<div><a href='{page}'><img src='{image}' /></a></div>", data))
       }
-    
+      /*
       var ws = new WebSocket("ws://localhost:8080/ncr");
       ws.onopen = function(e) { 
         console.log("open")
@@ -28,9 +28,31 @@
       ws.onclose = function(e) {
         console.log("close")
       };
+      */
     </script>
+    <style>
+      // TODO: plugin jquery, ktory dostaje url a zwraca clipniety div. uzyc document fragment do odczytania wymiarow obrazka
+      .crop {
+      }
+      .crop div {
+        width: 50px;
+        height: 50px;
+        clip:rect(0 0 100px 100px);
+        overflow:hidden;
+      }
+      .crop img {
+      }
+    </style>
   </head>
   <body>
     <h1>Flickr Spy</h1>
+    <p>
+      <div class="crop"><div>
+        <img class="crop" src="http://farm5.static.flickr.com/4005/4245886836_107349904e_m.jpg" />
+      </div></div>
+      <div class="crop"><div>
+        <img class="crop" src="http://farm5.static.flickr.com/4018/4247140359_12c7c4e35c_m.jpg" />
+      </div></div>
+    </p>
   </body>
 </html>

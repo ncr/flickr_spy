@@ -4,7 +4,7 @@ var sys = require("sys"),
   flickr = require("./vendor/flickr/lib/flickr").flickr,
   underscore = require("./vendor/underscore/underscore"),
   throttle = require("./vendor/throttle/lib/throttle"),
-  static = require("./vendor/static/lib/static").static,
+  static = require("./vendor/static/static").static,
   ws = require("./vendor/ws/lib/ws"),
   username = process.ARGV[2] || "ncr";
   
@@ -21,7 +21,7 @@ function nano(template, data) {
 sys.puts("* Flickr Spy: " + username);
 
 http.createServer(function (req, res) {
-  var path = req.uri.path;
+  var path = req.url;
   sys.debug(path);
   static("public", req, res);
 }).listen(3000);
@@ -45,18 +45,22 @@ var spy_emitter = function (username) {
   var emitter = new process.EventEmitter(),
     url = "http://flickr.com/photos/" + username;
   
+  // 1. Find my id
   flickr.rest.urls.lookupUser(url).addCallback(function (user_id) {
     var my_user_id = user_id;
     
+    // 2. Grab my contact list
     flickr.rest.contacts.getPublicList(user_id).addCallback(function (user_ids) {
       var contact_ids = user_ids,
         t1 = throttle.create(3),
         todo1 = user_ids.length, done1 = 0,
         todo2 = 0, done2 = 0;
       
+      // 3. Iterate over my contacts
       user_ids.forEach(function (user_id) {
         t1.run(function () {
           
+          // 4. Find latest commented photos by my contacts
           flickr.feeds.photosComments(user_id).addCallback(function (photo_ids) {
             var t2 = throttle.create(3);
             done1++;
@@ -71,22 +75,29 @@ var spy_emitter = function (username) {
               t2.free();
             };
 
+            // 5. Iterate over latest commented photos
             photo_ids.forEach(function (photo_id) {
               t2.run(function () {
                 
+                // 6. Get more detailed photo info
                 flickr.rest.photos.getInfo(photo_id).addCallback(function (photo) {
                   if(!photo.owner){sys.debug(sys.inspect(photo))} // fails sometimes
                   
-                  // skip my photos and photos of my contacts
+                  // 7. Skip my photos and photos of my contacts
                   if (photo.owner.nsid != my_user_id && !_.include(contact_ids, photo.owner.nsid)) {
                   
+                    // 8. Get full comment list for a photo
                     flickr.rest.photos.comments.getList(photo_id).addCallback(function (user_ids) {
-                      if(!_.include(user_ids, my_user_id)) { // skip if I already commented
+                      
+                      // 9. Skip if I already commented
+                      if(!_.include(user_ids, my_user_id)) {
 
                         var photo_url  = nano("http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg", photo);
                         var photo_page = nano("http://www.flickr.com/photos/{owner.nsid}/{id}", photo);
                         
                         sys.debug("callback: getList: data")
+                        
+                        // 10. Emit photo and my contacts that commented on that photo
                         emitter.emit("data", {page: photo_page, image: photo_url, contact_ids: _.intersect(contact_ids, user_ids)});
                       }
                       finalize();
