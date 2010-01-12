@@ -95,7 +95,7 @@ var spy_emitter = function (username) {
                         var photo_url  = nano("http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg", photo);
                         var photo_page = nano("http://www.flickr.com/photos/{owner.nsid}/{id}", photo);
                         
-                        sys.debug("callback: getList: data")
+                        sys.debug("" + photo.owner.nsid + ": " + photo.id)
                         
                         // 10. Emit photo and my contacts that commented on that photo
                         emitter.emit("data", {page: photo_page, image: photo_url, contact_ids: _.intersect(contact_ids, user_ids)});
