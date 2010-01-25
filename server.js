@@ -30,11 +30,7 @@ ws.createServer(function (websocket) {
   websocket.addListener("connect", function (resource) {
     sys.debug("connect: " + resource.slice(1));
     spy_emitter(resource.slice(1)).addListener("data", function (data) {
-      try {
-        websocket.send(JSON.stringify(data));
-      } catch(e) { // "Socket is not open for writing"
-        websocket.close();
-      }
+      websocket.send(JSON.stringify(data));
     }).addListener("close", function () {
       websocket.close();
     })
