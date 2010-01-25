@@ -22,7 +22,7 @@
         max = Math.max(width, height),
 
         length = l || min,
-        ratio  = length / min;
+        ratio  = length / min,
 
         newWidth  = Math.round(width * ratio),
         newHeight = Math.round(height * ratio),
@@ -44,7 +44,7 @@
           left: -deltaX
         });
 
-      e.css({width: newWidth, height: newHeight}).wrap(inner).parent().wrap(outer);
+      e.css({width: newWidth, height: newHeight}).wrap(outer).wrap(inner);
     });
   }
 })(jQuery);

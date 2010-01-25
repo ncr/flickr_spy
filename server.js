@@ -5,7 +5,7 @@ var sys = require("sys"),
   underscore = require("./vendor/underscore/underscore"),
   throttle = require("./vendor/throttle/lib/throttle"),
   static = require("./vendor/static/static").static,
-  ws = require("./vendor/ws/lib/ws"),
+  ws = require("./vendor/ws/ws"),
   username = process.ARGV[2] || "ncr";
   
 function nano(template, data) {
@@ -30,7 +30,11 @@ ws.createServer(function (websocket) {
   websocket.addListener("connect", function (resource) {
     sys.debug("connect: " + resource.slice(1));
     spy_emitter(resource.slice(1)).addListener("data", function (data) {
-      websocket.send(JSON.stringify(data));
+      try {
+        websocket.send(JSON.stringify(data));
+      } catch(e) { // "Socket is not open for writing"
+        websocket.close();
+      }
     }).addListener("close", function () {
       websocket.close();
     })
