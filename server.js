@@ -1,12 +1,13 @@
 var sys = require("sys"), 
   http = require("http"),
   posix = require("posix"),
-  flickr = require("./vendor/flickr/lib/flickr").flickr,
+  FlickrAPI= require('./vendor/flickr/lib/flickr').FlickrAPI,
   underscore = require("./vendor/underscore/underscore"),
   throttle = require("./vendor/throttle/lib/throttle"),
   static = require("./vendor/static/static").static,
-  ws = require("./vendor/ws/ws"),
+  ws = require("./vendor/ws/lib/ws"),
   username = process.ARGV[2] || "ncr";
+  
   
 function nano(template, data) {
   return template.replace(/\{([\w\.]*)}/g, function (str, key) {
@@ -19,6 +20,7 @@ function nano(template, data) {
 
 
 sys.puts("* Flickr Spy: " + username);
+flickr= new FlickrAPI("3f6ad5daec2a6a194c54f19ea38dbe5d");
 
 http.createServer(function (req, res) {
   var path = req.url;
@@ -44,15 +46,21 @@ ws.createServer(function (websocket) {
 var spy_emitter = function (username) {
   var emitter = new process.EventEmitter(),
     url = "http://flickr.com/photos/" + username;
-  
+
   // 1. Find my id
-  flickr.rest.urls.lookupUser(url).addCallback(function (user_id) {
-    var my_user_id = user_id;
-    
+  flickr.urls.lookupUser(url).addCallback(function (user) {
+    var my_user_id = user.id;
+
     // 2. Grab my contact list
-    flickr.rest.contacts.getPublicList(user_id).addCallback(function (user_ids) {
-      var contact_ids = user_ids,
-        t1 = throttle.create(3),
+    flickr.contacts.getPublicList(my_user_id).addCallback(function (contacts) {
+        var user_ids = [];
+        if( contacts.contact ) {
+            contacts.contact.forEach(function (c) {
+              user_ids.push(c.nsid);
+            });        
+        }
+        var contact_ids= user_ids;
+        var t1 = throttle.create(3),
         todo1 = user_ids.length, done1 = 0,
         todo2 = 0, done2 = 0;
       
@@ -61,9 +69,19 @@ var spy_emitter = function (username) {
         t1.run(function () {
           
           // 4. Find latest commented photos by my contacts
-          flickr.feeds.photosComments(user_id).addCallback(function (photo_ids) {
+          flickr.feeds.photosComments(user_id).addCallback(function (photo_comments) {
             var t2 = throttle.create(3);
             done1++;
+            var photo_ids= [];
+            photo_comments.items.forEach(function (p) {
+              var m = p.link.match(/(\d+)\/comment\d+\/$/); // won't match sets
+              if (m) { 
+                var photo_id = m[1];
+                if (photo_ids.indexOf(photo_id) == -1) {
+                  photo_ids.push(photo_id);
+                }
+              }  
+            });            
             todo2 += photo_ids.length;
             
             function finalize() {
@@ -80,14 +98,14 @@ var spy_emitter = function (username) {
               t2.run(function () {
                 
                 // 6. Get more detailed photo info
-                flickr.rest.photos.getInfo(photo_id).addCallback(function (photo) {
+                flickr.photos.getInfo(photo_id).addCallback(function (photo) {
                   if(!photo.owner){sys.debug(sys.inspect(photo))} // fails sometimes
                   
                   // 7. Skip my photos and photos of my contacts
                   if (photo.owner.nsid != my_user_id && !_.include(contact_ids, photo.owner.nsid)) {
                   
                     // 8. Get full comment list for a photo
-                    flickr.rest.photos.comments.getList(photo_id).addCallback(function (user_ids) {
+                    flickr.photos.comments.getList(photo_id).addCallback(function (user_ids) {
                       
                       // 9. Skip if I already commented
                       if(!_.include(user_ids, my_user_id)) {
@@ -103,7 +121,7 @@ var spy_emitter = function (username) {
                       finalize();
                     }).addErrback(function (data) {
                       // do not emit error from this loop
-                      sys.debug("errback: getList: " + data);
+                      sys.debug("errback: getList: " + data.message);
                       finalize();
                     });
                   } else {
@@ -111,8 +129,8 @@ var spy_emitter = function (username) {
                   }
                 }).addErrback(function (data) {
                   finalize();
-                  sys.debug("errback: geInfo: " + data);
-                });
+                  sys.debug("errback: geInfo: " + data.message);
+                });   
                 
               });
             });
@@ -120,19 +138,19 @@ var spy_emitter = function (username) {
             t1.free();
           }).addErrback(function (data) {
             emitter.emit("error");
-            sys.debug("errback: photosComments: " + data);
+            sys.debug("errback: photosComments: " + data.message);
           });
         });
       });
-      
     }).addErrback(function (data) {
       emitter.emit("error");
-      sys.debug("errback: getPublicList: " + data);
+      sys.debug("errback: getPublicList: " + data.message);
     });
+    
     
   }).addErrback(function (data) {
     emitter.emit("error");
-    sys.debug("errback: lookupUser: " + data);
+    sys.debug("errback: lookupUser: " + data.message);
   });
   return emitter;
 };
