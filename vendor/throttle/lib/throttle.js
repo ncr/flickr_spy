@@ -1,3 +1,14 @@
+/*
+  Example:
+
+  var t = throttle.create(3);
+  var f = function () { setTimeout(function () { t.free(); }, 2000) };
+  for(var i = 0; i < 10; i ++) {
+    t.add(f);
+  }
+
+*/
+
 exports.create = function (count) {
   var deferred = [];
   var running = 0;
