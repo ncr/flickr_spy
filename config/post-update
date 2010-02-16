@@ -2,12 +2,14 @@
 
 unset GIT_DIR
 
-CURRENT=`date +%Y-%m-%d-%H-%M-%S`
-cd /home/ncr/apps/flickr_spy
-git clone /home/repos/flickr_spy $CURRENT
-cd $CURRENT
-git submodule init
-git submodule update
-cd ..
-ln -sf $CURRENT current
-echo "OK!"
+CURRENT=`date +%Y-%m-%d-%H-%M-%S` &&
+cd /home/ncr/apps/flickr_spy &&
+git clone /home/ncr/repos/flickr_spy $CURRENT &&
+cd $CURRENT &&
+git submodule init &&
+git submodule update &&
+cd .. &&
+ln -sfT $CURRENT current &&
+sudo stop flickr-spy &&
+sudo start flickr-spy &&
+echo ok || echo fail
