@@ -22,7 +22,7 @@
           appendTo($("body")).find("img").hide().load(function(){$(this).sqrop(250).show()})
       }
 
-      var ws = new WebSocket("ws://localhost:8080/ncr");
+      var ws = new WebSocket("ws://" + window.location.hostname + ":8080/ncr");
       ws.onmessage = function(e) {
         append(JSON.parse(e.data))
       };
