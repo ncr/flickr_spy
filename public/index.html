@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>Flickr Spy</title>
@@ -23,21 +23,41 @@
       }
 
       var ws = new WebSocket("ws://localhost:8080/ncr");
-      ws.onopen = function(e) { 
-        // console.log("open")
-      };
       ws.onmessage = function(e) {
         append(JSON.parse(e.data))
       };
-      ws.onclose = function(e) {
-        // console.log("close")
-      };
+      /*
+      $(function(){
+        $("canvas").attr("width", $("body").width()).attr("height", 100);
+        var canvas = $("canvas").get(0)
+        var context = canvas.getContext("2d");
+        var imgd = context.createImageData(100, 100);
+
+        function putPixel (i, x, y, r, g, b, a) {
+          var p = (x * i.width + y) * 4;
+          i.data[p    ] = r;
+          i.data[p + 1] = g;
+          i.data[p + 2] = b;
+          i.data[p + 3] = a;
+        }
+        
+        function getPixel(i, x, y) {
+          var p = (x * i.width + y) * 4;
+          var pixel = Array.prototype.slice.call(i.data, p, p + 4);
+          console.log(pixel)
+        }
+        
+        putPixel(imgd, 10, 10, 255, 0, 0, 255);
+        getPixel(imgd, 10, 10);
+        context.putImageData(imgd, 0, 0);
+      })
+      */
     </script>
     <style>
       img {border: none;}
     </style>
   </head>
   <body>
-    <h1>Flickr Spy</h1>
+    <canvas><h1>Flickr Spy</h1></canvas>
   </body>
 </html>
