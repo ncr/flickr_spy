@@ -5,7 +5,7 @@ var sys = require("sys"),
   underscore = require("./vendor/underscore/underscore"),
   throttle = require("./vendor/throttle/lib/throttle"),
   static = require("./vendor/static/static").static,
-  ws = require("./vendor/ws/lib/ws"),
+  ws = require("./vendor/ws/ws"),
   username = process.ARGV[2] || "ncr";
   
   
