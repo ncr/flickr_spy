@@ -1,7 +1,7 @@
 var sys = require("sys"), 
   http = require("http"),
   posix = require("posix"),
-  FlickrAPI= require('./vendor/flickr/lib/flickr').FlickrAPI,
+  FlickrAPI = require('./vendor/flickr/lib/flickr').FlickrAPI,
   underscore = require("./vendor/underscore/underscore"),
   throttle = require("./vendor/throttle/lib/throttle"),
   static = require("./vendor/static/static").static,
@@ -20,7 +20,7 @@ function nano(template, data) {
 
 
 sys.puts("* Flickr Spy: " + username);
-flickr= new FlickrAPI("3f6ad5daec2a6a194c54f19ea38dbe5d");
+flickr = new FlickrAPI("3f6ad5daec2a6a194c54f19ea38dbe5d");
 
 http.createServer(function (req, res) {
   var path = req.url;
