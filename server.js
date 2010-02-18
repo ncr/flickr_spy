@@ -116,7 +116,7 @@ var spy_emitter = function (username) {
                         sys.debug("" + photo.owner.nsid + ": " + photo.id)
                         
                         // 10. Emit photo and my contacts that commented on that photo
-                        emitter.emit("data", {page: photo_page, image: photo_url, contact_ids: _.intersect(contact_ids, user_ids)});
+                        emitter.emit("data", {page: photo_page, image: photo_url, title: photo.title._content, contact_ids: _.intersect(contact_ids, user_ids)});
                       }
                       finalize();
                     }).addErrback(function (data) {

@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>Flickr Spy</title>
+    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/reset-fonts-grids/reset-fonts-grids.css">
+    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/base/base-min.css">
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/flick/jquery-ui.css" type="text/css" media="all" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>
@@ -17,15 +19,6 @@
     </script>
        
     <script type="text/javascript">
-      function append(data) {
-        $($.nano('<a href="{page}"><img class="crop" src="{image}" /></a>', data)).
-          appendTo($("body")).find("img").hide().load(function(){$(this).sqrop(250).show()})
-      }
-
-      var ws = new WebSocket("ws://" + window.location.hostname + ":8080/ncr");
-      ws.onmessage = function(e) {
-        append(JSON.parse(e.data))
-      };
       /*
       $(function(){
         $("canvas").attr("width", $("body").width()).attr("height", 100);
@@ -52,12 +45,79 @@
         context.putImageData(imgd, 0, 0);
       })
       */
+      (function() {
+        var spy = {
+          append: function (data) {
+            $($.nano('<a href="{page}"><img class="crop" src="{image}" /></a>', data)).
+              appendTo($("#results")).find("img").hide().load(function(){$(this).sqrop(240).show()})
+          },
+          debug: function (data) {
+            data.title = data.title || "Untitled";
+            $($.nano('<a href="{page}">{title}</a><br />', data)).appendTo($("#results"))
+          },
+          go: function (options, callback) {
+            var self = this;
+            var ws = new WebSocket("ws://" + window.location.hostname + ":8080/" + options.nickname);
+            
+            ws.onmessage = function(e) {
+              self[options.debug ? "debug": "append"](JSON.parse(e.data))
+            };
+            ws.onclose = function(e) {
+              if(callback) {
+                callback();
+              }
+            };
+          },
+          boot: function () {
+            var self = this;
+            $(function(){
+              var b = $("#button"),
+                n = $("#nickname"),
+                d = $("#debug"),
+                s = $("#search");
+
+              b.click(function(){
+                if(n.val().length > 0) {
+                  s.find("input").attr("disabled", "disabled").addClass("ui-state-disabled");
+                  self.go({ nickname: n.val(), debug: d.is(":checked") }, function(){
+                    s.find("input").removeAttr("disabled").removeClass("ui-state-disabled");
+                  });
+                } else {
+                  n.focus()
+                }
+                return false;
+              });
+            });
+          }
+        }
+        spy.boot();
+      })();
     </script>
     <style>
       img {border: none;}
+      a{margin: 0; padding: 0;}
     </style>
   </head>
   <body>
-    <!--><canvas><h1>Flickr Spy</h1></canvas><-->
+    <div id="doc" class="yui-t7">
+      <div id="hd" role="search">
+        <h1>Flickr Spy</h1>
+        <form id="search">
+          <label for="nickname">Nickname</label>
+          <input type="text" name="nickname" id="nickname" />
+          <label for="debug">Debug</label>
+          <input type="checkbox" name="debug" id="debug" />
+          <input type="submit" class="ui-state-default" id="button" value="Go!" />
+        </form>
+      </div>
+      <div id="bd" role="main">
+        <div class="yui-g">
+          <div id="results">
+          </div>
+          <div id="info">
+          </div>
+        </div>
+      </div>
+    </div>  
   </body>
 </html>
