@@ -130,6 +130,7 @@ var spy_emitter = function (username) {
                 }).addErrback(function (data) {
                   finalize();
                   sys.debug("errback: geInfo: " + data.message);
+                  emitter.emit("close");
                 });   
                 
               });
@@ -139,18 +140,21 @@ var spy_emitter = function (username) {
           }).addErrback(function (data) {
             emitter.emit("error");
             sys.debug("errback: photosComments: " + data.message);
+            emitter.emit("close");
           });
         });
       });
     }).addErrback(function (data) {
       emitter.emit("error");
       sys.debug("errback: getPublicList: " + data.message);
+      emitter.emit("close");
     });
     
     
   }).addErrback(function (data) {
     emitter.emit("error");
     sys.debug("errback: lookupUser: " + data.message);
+    emitter.emit("close");
   });
   return emitter;
 };
