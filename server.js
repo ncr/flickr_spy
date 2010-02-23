@@ -45,14 +45,17 @@ ws.createServer(function (websocket) {
 
 var spy_emitter = function (username) {
   var emitter = new process.EventEmitter(),
-    url = "http://flickr.com/photos/" + username;
+    url = "http://flickr.com/photos/" + username,
+    requests_count = 0;
 
   // 1. Find my id
   flickr.urls.lookupUser(url).addCallback(function (user) {
+    requests_count +=1;
     var my_user_id = user.id;
 
     // 2. Grab my contact list
     flickr.contacts.getPublicList(my_user_id).addCallback(function (contacts) {
+      requests_count +=1;
         var user_ids = [];
         if( contacts.contact ) {
             contacts.contact.forEach(function (c) {
@@ -70,6 +73,7 @@ var spy_emitter = function (username) {
           
           // 4. Find latest commented photos by my contacts
           flickr.feeds.photosComments(user_id).addCallback(function (photo_comments) {
+            requests_count +=1;
             var t2 = throttle.create(3);
             done1++;
             var photo_ids= [];
@@ -99,6 +103,7 @@ var spy_emitter = function (username) {
                 
                 // 6. Get more detailed photo info
                 flickr.photos.getInfo(photo_id).addCallback(function (photo) {
+                  requests_count +=1;
                   if(!photo.owner){sys.debug(sys.inspect(photo))} // fails sometimes
                   
                   // 7. Skip my photos and photos of my contacts
@@ -106,6 +111,7 @@ var spy_emitter = function (username) {
                   
                     // 8. Get full comment list for a photo
                     flickr.photos.comments.getList(photo_id).addCallback(function (user_ids) {
+                      requests_count +=1;
                       
                       // 9. Skip if I already commented
                       if(!_.include(user_ids, my_user_id)) {
@@ -116,7 +122,13 @@ var spy_emitter = function (username) {
                         sys.debug("" + photo.owner.nsid + ": " + photo.id)
                         
                         // 10. Emit photo and my contacts that commented on that photo
-                        emitter.emit("data", {page: photo_page, image: photo_url, title: photo.title._content, contact_ids: _.intersect(contact_ids, user_ids)});
+                        emitter.emit("data", {
+                          page: photo_page, 
+                          image: photo_url, 
+                          title: photo.title._content, 
+                          contact_ids: _.intersect(contact_ids, user_ids),
+                          requests_count: requests_count
+                        });
                       }
                       finalize();
                     }).addErrback(function (data) {
