@@ -79,6 +79,7 @@
               b.click(function(){
                 if(n.val().length > 0) {
                   s.find("input").attr("disabled", "disabled").addClass("ui-state-disabled");
+                  $("#results").empty()
                   self.go({ nickname: n.val(), debug: d.is(":checked") }, function(){
                     s.find("input").removeAttr("disabled").removeClass("ui-state-disabled");
                   });
