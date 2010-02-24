@@ -53,7 +53,8 @@
           },
           debug: function (data) {
             data.title = data.title || "Untitled";
-            $($.nano('<span>{requests_count} <a href="{page}">{title}</a></span><br />', data)).appendTo($("#results"))
+            $($.nano('<a href="{page}">{title}</a><br />', data)).appendTo($("#results"))
+            $("#info h1").html(data.requests_count)
           },
           go: function (options, callback) {
             var self = this;
@@ -110,12 +111,13 @@
           <input type="checkbox" name="debug" id="debug" />
           <input type="submit" class="ui-state-default" id="button" value="Go!" />
         </form>
+        <div id="info">
+          <h1></h1>
+        </div>
       </div>
       <div id="bd" role="main">
         <div class="yui-g">
           <div id="results">
-          </div>
-          <div id="info">
           </div>
         </div>
       </div>
