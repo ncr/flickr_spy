@@ -63,7 +63,7 @@ var spy_emitter = function (username) {
             });        
         }
         var contact_ids= user_ids;
-        var t1 = throttle.create(3),
+        var t1 = throttle.create(5),
         todo1 = user_ids.length, done1 = 0,
         todo2 = 0, done2 = 0;
       
@@ -74,7 +74,7 @@ var spy_emitter = function (username) {
           // 4. Find latest commented photos by my contacts
           flickr.feeds.photosComments(user_id).addCallback(function (photo_comments) {
             requests_count +=1;
-            var t2 = throttle.create(3);
+            var t2 = throttle.create(5);
             done1++;
             var photo_ids= [];
             photo_comments.items.forEach(function (p) {
