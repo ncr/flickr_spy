@@ -1,49 +1,34 @@
 // some bits taken from http://github.com/visionmedia/express
 
 var sys = require("sys"),
-  posix = require("posix"),
+  fs = require("fs"),
   path = require("path");
 
 exports.static = function (base, request, response) {
 
   base = base || "public";
   
-  var extname = function (path) {
-    if (path.lastIndexOf(".") < 0) return
-    return path.slice(path.lastIndexOf(".") + 1)
-  }
-  
   var uriPath = (request.url == "/") ? "/index.html" : request.url,
     file = path.normalize(base + uriPath);
   
   var four_oh_four = function () {
-    posix.cat("public/404.html").addCallback(function (data) {
-      response.sendHeader(404, { "Content-Type": "text/html", "Content-Length": data.length });
-      response.sendBody(data);
-      response.finish();
-    }).addErrback(function () {
-      var data = "<h1>404 Not Found</h1>";
-      response.sendHeader(404, { "Content-Type": "text/html", "Content-Length": data.length });
-      response.sendBody(data);
-      response.finish();
+    fs.readFile("public/404.html", function (err, data) {
+      if (err) {
+        data = "<h1>404 Not Found</h1>";
+      }
+      response.writeHeader(404, { "Content-Type": "text/html", "Content-Length": data.length });
+      response.write(data);
+      response.close();
     });
   }
 
-  path.exists(file, function (exists) {
-    if (exists) {
-      posix.stat(file).addCallback(function (stats) {
-        if (stats.isFile()) {
-          posix.cat(file, "binary").addCallback(function (data) {
-            response.sendHeader(200, { "Content-Type": mime[extname(file)], "Content-Length": data.length });
-            response.sendBody(data, "binary");
-            response.finish();
-          })
-        } else {
-          four_oh_four();
-        }
-      });
-    } else {
+  fs.readFile(file, "binary", function(err, data){
+    if (err) {
       four_oh_four();
+    } else {
+      response.sendHeader(200, { "Content-Type": mime[path.extname(file)], "Content-Length": data.length });
+      response.write(data, "binary");
+      response.close();
     }
   });
     
