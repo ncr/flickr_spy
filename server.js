@@ -1,6 +1,6 @@
 var sys = require("sys"), 
   http = require("http"),
-  posix = require("posix"),
+  posix = require("fs"),
   FlickrAPI = require('./vendor/flickr/lib/flickr').FlickrAPI,
   underscore = require("./vendor/underscore/underscore"),
   throttle = require("./vendor/throttle/lib/throttle"),
@@ -158,17 +158,3 @@ var spy_emitter = function (username) {
   });
   return emitter;
 };
-
-var spy_promise = function (username) {
-  var promise = new process.Promise();
-  var result = [];
-  spy_emitter(username).addListener("data", function (data) {
-    result.push(data);
-  }).addListener("close", function () {
-    promise.emitSuccess(result);
-  }).addListener("error", function (data) {
-    promise.emitError(data);
-  })
-  return promise;
-}
-
