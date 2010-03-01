@@ -32,12 +32,12 @@ ws.createServer(function (websocket) {
   websocket.addListener("connect", function (resource) {
     sys.debug("connect: " + resource.slice(1));
     spy_emitter(resource.slice(1)).addListener("data", function (data) {
-      websocket.send(JSON.stringify(data));
+      websocket.write(JSON.stringify(data));
     }).addListener("close", function () {
       websocket.close();
     })
-  }).addListener("receive", function (data) {
-    sys.debug("receive: " + data);
+  }).addListener("data", function (data) {
+    sys.debug("data: " + data);
   }).addListener("close", function () {
     sys.debug("close")
   });
@@ -49,30 +49,50 @@ var spy_emitter = function (username) {
     requests_count = 0;
 
   // 1. Find my id
-  flickr.urls.lookupUser(url).addCallback(function (user) {
+  flickr.urls.lookupUser(url, function (err, user) {
+    if(err) {
+      emitter.emit("error");
+      sys.debug("errback: lookupUser: " + data.message);
+      emitter.emit("close");
+      return;
+    }
+
     requests_count +=1;
     var my_user_id = user.id;
 
     // 2. Grab my contact list
-    flickr.contacts.getPublicList(my_user_id).addCallback(function (contacts) {
+    flickr.contacts.getPublicList(my_user_id, null, function (err, contacts) {
+      if(err) {
+        emitter.emit("error");
+        sys.debug("errback: getPublicList: " + data.message);
+        emitter.emit("close");
+        return;
+      }
+      
       requests_count +=1;
-        var user_ids = [];
-        if( contacts.contact ) {
-            contacts.contact.forEach(function (c) {
-              user_ids.push(c.nsid);
-            });        
-        }
-        var contact_ids= user_ids;
-        var t1 = throttle.create(5),
-        todo1 = user_ids.length, done1 = 0,
-        todo2 = 0, done2 = 0;
+      var user_ids = [];
+      if( contacts.contact ) {
+        contacts.contact.forEach(function (c) {
+          user_ids.push(c.nsid);
+        });        
+      }
+      var contact_ids = user_ids;
+      var t1 = throttle.create(5),
+      todo1 = user_ids.length, done1 = 0,
+      todo2 = 0, done2 = 0;
       
       // 3. Iterate over my contacts
       user_ids.forEach(function (user_id) {
         t1.run(function () {
           
           // 4. Find latest commented photos by my contacts
-          flickr.feeds.photosComments(user_id).addCallback(function (photo_comments) {
+          flickr.feeds.photosComments(user_id, null, function (err, photo_comments) {
+            if (err) {
+              emitter.emit("error");
+              sys.debug("errback: photosComments: " + data.message);
+              emitter.emit("close");
+              return;
+            }
             requests_count +=1;
             var t2 = throttle.create(5);
             done1++;
@@ -102,7 +122,13 @@ var spy_emitter = function (username) {
               t2.run(function () {
                 
                 // 6. Get more detailed photo info
-                flickr.photos.getInfo(photo_id).addCallback(function (photo) {
+                flickr.photos.getInfo(photo_id, null, function (err, photo) {
+                  if (err) {
+                    finalize();
+                    sys.debug("errback: geInfo: " + data.message);
+                    emitter.emit("close");
+                    return;
+                  }
                   requests_count +=1;
                   if(!photo.owner){sys.debug(sys.inspect(photo))} // fails sometimes
                   
@@ -110,7 +136,14 @@ var spy_emitter = function (username) {
                   if (photo.owner.nsid != my_user_id && !_.include(contact_ids, photo.owner.nsid)) {
                   
                     // 8. Get full comment list for a photo
-                    flickr.photos.comments.getList(photo_id).addCallback(function (user_ids) {
+                    flickr.photos.comments.getList(photo_id, null, function (err, user_ids) {
+                      if (err) {
+                        // do not emit error from this loop
+                        sys.debug("errback: getList: " + data.message);
+                        finalize();
+                        return;
+                      }
+                      
                       requests_count +=1;
                       
                       // 9. Skip if I already commented
@@ -131,42 +164,19 @@ var spy_emitter = function (username) {
                         });
                       }
                       finalize();
-                    }).addErrback(function (data) {
-                      // do not emit error from this loop
-                      sys.debug("errback: getList: " + data.message);
-                      finalize();
                     });
                   } else {
                     finalize();
                   }
-                }).addErrback(function (data) {
-                  finalize();
-                  sys.debug("errback: geInfo: " + data.message);
-                  emitter.emit("close");
                 });   
-                
               });
             });
             
             t1.free();
-          }).addErrback(function (data) {
-            emitter.emit("error");
-            sys.debug("errback: photosComments: " + data.message);
-            emitter.emit("close");
           });
         });
       });
-    }).addErrback(function (data) {
-      emitter.emit("error");
-      sys.debug("errback: getPublicList: " + data.message);
-      emitter.emit("close");
     });
-    
-    
-  }).addErrback(function (data) {
-    emitter.emit("error");
-    sys.debug("errback: lookupUser: " + data.message);
-    emitter.emit("close");
   });
   return emitter;
 };
