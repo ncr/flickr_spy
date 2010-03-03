@@ -149,7 +149,7 @@ var spy_emitter = function (username) {
                       // 9. Skip if I already commented
                       if(!_.include(user_ids, my_user_id)) {
 
-                        var photo_url  = nano("http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg", photo);
+                        var photo_url  = nano("http://farm{farm}.static.flickr.com/{server}/{id}_{secret}_s.jpg", photo);
                         var photo_page = nano("http://www.flickr.com/photos/{owner.nsid}/{id}", photo);
                         
                         sys.debug("" + photo.owner.nsid + ": " + photo.id)
@@ -160,7 +160,8 @@ var spy_emitter = function (username) {
                           image: photo_url, 
                           title: photo.title._content, 
                           contact_ids: _.intersect(contact_ids, user_ids),
-                          requests_count: requests_count
+                          requests_count: requests_count,
+                          timestamp: photo.dates.posted
                         });
                       }
                       finalize();

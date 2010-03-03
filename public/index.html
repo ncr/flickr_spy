@@ -2,14 +2,16 @@
 <html>
   <head>
     <title>Flickr Spy</title>
-    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/reset-fonts-grids/reset-fonts-grids.css">
-    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/base/base-min.css">
-    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/flick/jquery-ui.css" type="text/css" media="all" />
+    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/reset-fonts-grids/reset-fonts-grids.css" />
+    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/base/base-min.css" />
+    <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/flick/jquery-ui.css" />
+
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>
-    
-    <script type="text/javascript" src="/jquery.nano.js"></script>
-    <script type="text/javascript" src="/jquery.sqrop.js"></script>
+    <script type="text/javascript" src="http://github.com/documentcloud/underscore/raw/0.6.0/underscore-min.js"></script>
+    <script type="text/javascript" src="http://github.com/razorjack/quicksand/raw/master/jquery.quicksand.min.js"></script>
+    <script type="text/javascript" src="http://github.com/trix/nano/raw/master/jquery.nano.js"></script>
+    <script type="text/javascript" src="http://github.com/ncr/jquery.sqrop/raw/master/jquery.sqrop.js"></script>
     
     <script type="text/javascript" src="/ws/swfobject.js"></script>
     <script type="text/javascript" src="/ws/FABridge.js"></script>
@@ -45,11 +47,30 @@
         context.putImageData(imgd, 0, 0);
       })
       */
+      // appendTo($("#purgatory"))//.find("img").hide().load(function(){$(this).sqrop(30).show()})
+      
       (function() {
         var spy = {
+          timestamps: [],
           append: function (data) {
-            $($.nano('<a href="{page}"><img class="crop" src="{image}" /></a>', data)).
-              appendTo($("#results")).find("img").hide().load(function(){$(this).sqrop(240).show()})
+            var index = _.sortedIndex(this.timestamps, data.timestamp);
+            this.timestamps.splice(index, 0, data.timestamp);
+
+            var e = $($.nano('<a href="{page}"><img class="crop" src="{image}" /></a>', data))
+
+            if(this.timestamps.length == 1) {
+              $("#purgatory").append(e)
+            } else {
+              console.log("x: " + index)
+              console.log("y: " + $("#purgatory a").length)
+              console.log("z: " + $("#purgatory a").get(Math.max(0, index - 1)))
+              $($("#purgatory a").get(Math.max(0, index - 1))).after(e)
+            }
+            if(!this.interval_id) {
+              this.interval_id = setInterval(function(){
+                $("#results").quicksand("#purgatory a", {attribute: "href"})
+              }, 5000)
+            }
           },
           debug: function (data) {
             data.title = data.title || "Untitled";
@@ -96,8 +117,9 @@
       })();
     </script>
     <style>
-      img {border: none;}
+      img {border: none; width: 30px; height: 30px;}
       a{margin: 0; padding: 0;}
+      #purgatory{display: none;}
     </style>
   </head>
   <body>
@@ -118,6 +140,8 @@
       <div id="bd" role="main">
         <div class="yui-g">
           <div id="results">
+          </div>
+          <div id="purgatory">
           </div>
         </div>
       </div>
