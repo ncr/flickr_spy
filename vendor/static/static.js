@@ -26,7 +26,8 @@ exports.static = function (base, request, response) {
     if (err) {
       four_oh_four();
     } else {
-      response.sendHeader(200, { "Content-Type": mime[path.extname(file)], "Content-Length": data.length });
+      sys.debug(path.extname(file))
+      response.sendHeader(200, { "Content-Type": mime[path.extname(file).slice(1)], "Content-Length": data.length });
       response.write(data, "binary");
       response.close();
     }
